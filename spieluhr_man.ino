@@ -4,11 +4,10 @@
 #include <ArduinoOTA.h>
 #include <EEPROM.h>
 #include <time.h>
-#include "SpieluhrDFPlayer.h"  // 
-#include "UserDaten.h"  //
 
-#define MOSFET_LED D6
-#define BUTTON_RND D1
+#include "UserDaten.h"  
+#include "SpieluhrDFPlayer.h"
+
 
 ESP8266WiFiMulti wifiMulti;
 ESP8266WebServer server(80);
