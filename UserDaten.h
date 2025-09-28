@@ -13,3 +13,10 @@
 // OTA-Konfiguration
 #define HOSTNAME "spieluhr-1"      // Hostname für OTA
 #define otaPASSWD "0987654321123"  // Passwort für OTA
+
+// Hardware-Konfiguration
+#define MOSFET_LED D2
+#define BUTTON_RND D1
+
+#define DEBOUNCE_DELAY 50
+#define HISTORY_SIZE 10
