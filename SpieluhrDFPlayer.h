@@ -5,16 +5,17 @@
 #include <DFMiniMp3.h>
 #include <time.h>
 #include <ESP8266WebServer.h>
+#include "UserDaten.h"
 
 class SpieluhrDFPlayer {
   public:
-    SpieluhrDFPlayer(uint8_t ledPin, ESP8266WebServer& webServer)
-      : led(ledPin), server(webServer), dfmp3(Serial) {}
+    SpieluhrDFPlayer(uint8_t ledPin, uint8_t  ButtonPin, ESP8266WebServer& webServer)
+      : led(ledPin), Button(ButtonPin), server(webServer), dfmp3(Serial) {}
 
     void begin() {
       pinMode(led, OUTPUT);
-      digitalWrite(led, HIGH);
-
+      digitalWrite(led, 0);
+      pinMode(Button, INPUT_PULLUP);
       EEPROM.begin(2);
       modi = EEPROM.read(0);
       werkstattModus = EEPROM.read(1);
@@ -23,15 +24,13 @@ class SpieluhrDFPlayer {
       dfmp3.begin();
       dfmp3.setVolume(volume);
       df_Status = "Bereit";
-
-      digitalWrite(led, LOW);
     }
 
     void loop() {
       dfmp3.loop();
       checkAndPlayMp3();
+      checkButton();
     }
-
     void playStartupMelody() {
       playDFplayer(32);  // Startmelodie
     }
@@ -71,12 +70,20 @@ class SpieluhrDFPlayer {
     }
 
   private:
+    uint8_t led;
+    uint8_t Button;
     uint8_t modi = 1;
     uint8_t werkstattModus = 0;
     uint8_t volume = 20;
-    uint8_t led;
     String df_Status = "unbekannt";
 
+
+    bool buttonState = LOW;
+    bool lastButtonState = LOW;
+    unsigned long lastDebounceTime = 0;
+
+    uint16_t songHistory[HISTORY_SIZE] = {0};
+    uint8_t historyIndex = 0;
     ESP8266WebServer& server;
 
     class Mp3Notify;
@@ -87,7 +94,7 @@ class SpieluhrDFPlayer {
       dfmp3.setVolume(volume);
       dfmp3.playMp3FolderTrack(song);
       df_Status = "Spiele Song: " + String(song);
-      digitalWrite(led, HIGH);
+      digitalWrite(led, 1);
       return song;
     }
 
@@ -147,19 +154,19 @@ class SpieluhrDFPlayer {
       html += "<tr><td class='name'>Anzahl Songs</td><td class='value' id='count'>Lade Songs...</td></tr>\n";
       html += "<tr><td class='name'>status</td><td class='value' id='status'>Lade Status...</td></tr>\n";
       html += "</table>\n";
-    
+
       html += "<form action='/config' method='get'>\n";
       html += "<h3>MODI:</h3>\n";
       html += String("<input type='radio' name='modi' value='0'") + (modi == 0 ? " checked" : "") + "> 1x Std.<br>\n";
       html += String("<input type='radio' name='modi' value='1'") + (modi == 1 ? " checked" : "") + "> 2x Std.<br>\n";
       html += String("<input type='radio' name='modi' value='2'") + (modi == 2 ? " checked" : "") + "> 4x Std.<br>\n";
-    
+
       html += "<h3>Werkstatt-Modus:</h3>\n";
       html += String("<input type='checkbox' name='werkstatt' value='1'") + (werkstattModus == 1 ? " checked" : "") + "> Mo–Fr aktiv<br>\n";
-    
+
       html += "<br><input type='submit' value='Speichern'>\n";
       html += "</form>\n";
-    
+
       html += "<script>\n";
       html += "function playSelected() { ";
       html += "var song = document.getElementById('songSelect').value; ";
@@ -236,10 +243,57 @@ class SpieluhrDFPlayer {
       server.send(200, "text/css", css);
     }
 
+    void playRandomSong() {
+      uint16_t total = dfmp3.getTotalTrackCount(DfMp3_PlaySource_Sd);
+      if (total == 0) return;
+
+      uint16_t song;
+      uint8_t attempts = 0;
+
+      do {
+        song = random(1, total + 1);
+        attempts++;
+      } while (isInHistory(song) && attempts < 20);
+
+      playDFplayer(song);
+      addToHistory(song);
+    }
+
+    void addToHistory(uint16_t song) {
+      songHistory[historyIndex] = song;
+      historyIndex = (historyIndex + 1) % HISTORY_SIZE;
+    }
+
+    bool isInHistory(uint16_t song) {
+      for (int i = 0; i < HISTORY_SIZE; i++) {
+        if (songHistory[i] == song) return true;
+      }
+      return false;
+    }
+
+    void checkButton() {
+      bool reading = digitalRead(Button);
+
+      if (reading != lastButtonState) {
+        lastDebounceTime = millis();
+      }
+
+      if ((millis() - lastDebounceTime) > DEBOUNCE_DELAY) {
+        if (reading != buttonState) {
+          buttonState = reading;
+          if (buttonState == HIGH) {
+            playRandomSong();
+          }
+        }
+      }
+
+      lastButtonState = reading;
+    }
+
     class Mp3Notify {
       public:
         static void OnPlayFinished([[maybe_unused]] DfMp3& mp3, [[maybe_unused]] DfMp3_PlaySources source, uint16_t track) {
-          digitalWrite(D4, LOW);  // LED aus
+         digitalWrite(MOSFET_LED, 0);
         }
         static void OnError([[maybe_unused]] DfMp3& mp3, uint16_t errorCode) {}
         static void OnPlaySourceOnline([[maybe_unused]] DfMp3& mp3, DfMp3_PlaySources source) {}
