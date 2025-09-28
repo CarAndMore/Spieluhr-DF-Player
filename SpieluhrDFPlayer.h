@@ -128,21 +128,45 @@ class SpieluhrDFPlayer {
       html += "<link rel='stylesheet' href='/style.css'>\n";
 
       html += "</head>\n<body>\n";
-      html += "<h1>Spieluhr</h1>";
-      html += "<form action='/play'><select name='song'>";
+      html += "<h1>Spieluhr</h1>\n";
+
+      html += "<div>";
+      html += "<select id='songSelect'>\n";
       for (uint16_t i = 1; i <= count; i++) {
-        html += "<option value='" + String(i) + "'>Song " + String(i) + "</option>";
+        html += "<option value='" + String(i) + "'>Song " + String(i) + "</option>\n";
       }
-      html += "</select><input type='submit' value='Play'></form>";
-      html += "<form action='/config' method='get'>";
-      html += "<h3>Modus:</h3>";
-      html += "<input type='radio' name='modi' value='0'" + String(modi == 0 ? " checked" : "") + "> 1x Std.<br>";
-      html += "<input type='radio' name='modi' value='1'" + String(modi == 1 ? " checked" : "") + "> 2x Std.<br>";
-      html += "<input type='radio' name='modi' value='2'" + String(modi == 2 ? " checked" : "") + "> 4x Std.<br>";
-      html += "<h3>Werkstatt-Modus:</h3>";
-      html += "<input type='checkbox' name='werkstatt' value='1'" + String(werkstattModus == 1 ? " checked" : "") + "> Mo–Fr aktiv<br>";
-      html += "<input type='submit' value='Speichern'></form>";
-      html += "</body></html>";
+      html += "</select>\n";
+      html += "<button onclick='playSelected()'>Play</button>\n";
+      html += "</div>\n";
+      html += "<div id='playResult'></div>\n";
+      html += "<table border='1' style='margin: 20px auto; font-size: 14pt;'>\n";
+      html += "<tr><td class='name'>Uhrzeit</td><td class='value' id='uhrzeit'>Lade Uhrzeit...</td></tr>\n";
+      html += "<tr><td class='name'>Datum</td><td class='value' id='datum'>Lade Datum...</td></tr>\n";
+      html += "<tr><td class='name'>SSID</td><td class='value' id='ssid'>Lade SSID...</td></tr>\n";
+      html += "<tr><td class='name'>IP-Adresse</td><td class='value' id='iplocal'>Lade IP Ardesse...</td></tr>\n";
+      html += "<tr><td class='name'>Anzahl Songs</td><td class='value' id='count'>Lade Songs...</td></tr>\n";
+      html += "<tr><td class='name'>status</td><td class='value' id='status'>Lade Status...</td></tr>\n";
+      html += "</table>\n";
+    
+      html += "<form action='/config' method='get'>\n";
+      html += "<h3>MODI:</h3>\n";
+      html += String("<input type='radio' name='modi' value='0'") + (modi == 0 ? " checked" : "") + "> 1x Std.<br>\n";
+      html += String("<input type='radio' name='modi' value='1'") + (modi == 1 ? " checked" : "") + "> 2x Std.<br>\n";
+      html += String("<input type='radio' name='modi' value='2'") + (modi == 2 ? " checked" : "") + "> 4x Std.<br>\n";
+    
+      html += "<h3>Werkstatt-Modus:</h3>\n";
+      html += String("<input type='checkbox' name='werkstatt' value='1'") + (werkstattModus == 1 ? " checked" : "") + "> Mo–Fr aktiv<br>\n";
+    
+      html += "<br><input type='submit' value='Speichern'>\n";
+      html += "</form>\n";
+    
+      html += "<script>\n";
+      html += "function playSelected() { ";
+      html += "var song = document.getElementById('songSelect').value; ";
+      html += "loadDoc('/play?song=' + song, 'playResult'); ";
+      html += "} ";
+      html += "\n</script>\n";
+      html += "</body>\n</html>\n";
       server.send(200, "text/html", html);
     }
 
