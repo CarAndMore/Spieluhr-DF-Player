@@ -48,6 +48,39 @@ ESP8266WebServer server(80);
 // Instanz der Spieluhr-Klasse
 SpieluhrDFPlayer spieluhr(server);  // LED-Pin + Webserver übergeben
 
+void init_Netzwerk();
+
+void setup() {
+  EEPROM.begin(2);     // 1 Byte für modi, 1 Byte für werkstattModus
+  Serial.begin(9600);  // Muss aktiv sein für DFPlayer
+
+  // Initialisiert die Netzwerkverbindung, den Webserver und die OTA-Funktionalität.
+  init_Netzwerk();
+
+  // Initialisierung der Spieluhr
+  spieluhr.begin();
+
+  // Zeitsynchronisation
+  configTime(0, 0, "pool.ntp.org", "time.nist.gov");
+  setenv("TZ", "CET-1CEST,M3.5.0,M10.5.0/3", 1);
+  tzset();
+
+  // Warte auf gültige Zeit
+  while (time(nullptr) < 100000) {
+    delay(100);
+  }
+
+  // Startmelodie abspielen
+  spieluhr.playStartupMelody();
+}
+
+void loop() {
+  server.handleClient();
+  ArduinoOTA.handle();
+  dnsServer.processNextRequest();
+  spieluhr.loop();  // Zeitgesteuerte Wiedergabe + DFPlayer-Handling
+}
+
 /**
  * Initialisiert die Netzwerkverbindung, den Webserver und die OTA-Funktionalität.
  * 
@@ -86,35 +119,4 @@ void init_Netzwerk() {
   ArduinoOTA.setHostname(HOSTNAME);
   ArduinoOTA.setPassword(otaPASSWD);
   ArduinoOTA.begin();
-}
-
-void setup() {
-  EEPROM.begin(2);     // 1 Byte für modi, 1 Byte für werkstattModus
-  Serial.begin(9600);  // Muss aktiv sein für DFPlayer
-
-  // Initialisiert die Netzwerkverbindung, den Webserver und die OTA-Funktionalität.
-  init_Netzwerk();
-
-  // Initialisierung der Spieluhr
-  spieluhr.begin();
-
-  // Zeitsynchronisation
-  configTime(0, 0, "pool.ntp.org", "time.nist.gov");
-  setenv("TZ", "CET-1CEST,M3.5.0,M10.5.0/3", 1);
-  tzset();
-
-  // Warte auf gültige Zeit
-  while (time(nullptr) < 100000) {
-    delay(100);
-  }
-
-  // Startmelodie abspielen
-  spieluhr.playStartupMelody();
-}
-
-void loop() {
-  server.handleClient();
-  ArduinoOTA.handle();
-  dnsServer.processNextRequest();
-  spieluhr.loop();  // Zeitgesteuerte Wiedergabe + DFPlayer-Handling
 }
