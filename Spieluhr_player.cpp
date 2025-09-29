@@ -1,5 +1,5 @@
 
-/* Version 0.23 */
+/* Version 0.24 */
 #include "SpieluhrDFPlayer.h"
 
 /**
@@ -59,7 +59,7 @@ void SpieluhrDFPlayer::loop() {
  * Diese Funktion ruft `playDFplayer(32)` auf, wobei Track 32 als Begrüßungsmelodie definiert ist.
  * Sie kann z. B. im `begin()`-Setup oder direkt nach dem Bootvorgang verwendet werden.
  */
-void playStartupMelody() {
+void SpieluhrDFPlayer::playStartupMelody() {
   playDFplayer(32);  // Startmelodie
 }
 
