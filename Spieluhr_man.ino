@@ -2,7 +2,7 @@
  * @file SpieluhrMain.ino
  * @brief Hauptprogramm für die Netzwerk-Spieluhr mit DFPlayer Mini und Webinterface.
  * 
- * Version: 0.23  
+ * Version: 0.24  
  * Autor: Carsten  
  * 
  * Dieses Programm steuert eine vernetzte MP3-Spieluhr auf Basis des ESP8266.
@@ -30,14 +30,12 @@
 #include <ESP8266WiFiMulti.h>
 #include <ESP8266WebServer.h>
 
-
 #include <ArduinoOTA.h>
 #include <EEPROM.h>
 #include <time.h>
 
 #include "UserDaten.h"
 #include "SpieluhrDFPlayer.h"
-
 
 const byte DNS_PORT = 53;
 
@@ -46,7 +44,7 @@ ESP8266WiFiMulti wifiMulti;
 ESP8266WebServer server(80);
 
 // Instanz der Spieluhr-Klasse
-SpieluhrDFPlayer spieluhr(server);  // LED-Pin + Webserver übergeben
+SpieluhrDFPlayer spieluhr(server);  // Webserver übergeben
 
 void init_Netzwerk();
 
