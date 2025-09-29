@@ -339,4 +339,5 @@ String SpieluhrDFPlayer::kleinerNull(int value) {
   } else {
     return String(value);
   }
-  /************************/
+}
+/************************/
