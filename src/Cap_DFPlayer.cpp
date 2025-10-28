@@ -69,3 +69,4 @@ bool MP3Player::isInHistory(uint16_t song) {
   }
   return false;
 }
+
