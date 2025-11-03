@@ -1,6 +1,9 @@
 # 🎶 ESP8266 Spieluhr mit DFPlayer Mini
 Dieses Projekt ist eine vernetzte, modular aufgebaute MP3-Spieluhr auf Basis eines ESP8266 und DFPlayer Mini. Sie spielt Musik zu festen Zeiten, kann über Touchsensoren oder ein Webinterface gesteuert werden und unterstützt OTA-Updates, WLAN-Konfiguration sowie ein Live-CSS-Editor für die Oberfläche.
 
+![PCB Forderseite](/Spieluhr_F.JPG)
+![PCB Forderseite](/Spieluhr_B.JPG)
+
 ## 🧰 Funktionen
 
 - ⏰ Zeitgesteuerte Wiedergabe (z. B. jede Stunde)
