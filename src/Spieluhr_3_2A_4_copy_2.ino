@@ -1,5 +1,5 @@
 /*** main.ino: */
-/*** Spieluhr V4:
+/*** Spieluhr V4.2:
  *  Einstiegspunkt der Spieluhr-Firmware.
  * 
  *  Initialisiert alle Module (Webserver, MP3-Player, Portexpander, Scheduler),
@@ -13,13 +13,14 @@
  *  - UserDaten.h
  *  - Spieluhr.h / Spieluhr.cpp / Cap_Filesystem.cpp /
  *    Cap_SystemEndpoints.cpp / Cap_mp3ndpoints.cpp / 
- *    Cap_ExpanderEndpoints.cpp / Cap_FilesystemEndpoints.cpp
+ *    Cap_ExpanderEndpoints.cpp / Cap_FilesystemEndpoints.cpp /
+ *    OutputController.h
  *  - PlaybackScheduler.h / PlaybackScheduler.cpp
  *  - Cap_DFPlayer.h / Cap_DFPlayer.cpp
  *  - Cap_Expander.h / Cap_Expander.cpp
  *  - Cap_WebServer.h / Cap_WebServer.cpp / html.cpp / 
  *    JavaScript.cpp / Style.cpp
- */
+ */    
 
 #include <ESP8266WiFi.h>
 #include <DNSServer.h>
@@ -32,6 +33,12 @@
 
 #include "UserDaten.h"
 #include "Spieluhr.h"
+
+
+
+// Ports für DNS und Webserver
+#define PORT_AP_DNS 53          ///< DNS-Port für Captive Portal 
+#define PORT_HTML   80          ///< HTTP-Port für Webserver
 
 // DNS-Server für Captive Portal
 DNSServer dnsServer;
