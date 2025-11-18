@@ -7,19 +7,19 @@ void Spieluhr::begin(uint8_t PCF_addr) {
   pcf8574->begin();
   pcf8574->writeOutputs(io_all_OFF);
 
+  outputCtrl = new OutputController(pcf8574);
+
   mp3 = new MP3Player(Serial);
   mp3->begin(18);
 
   mp3->onPlaybackChange = [&](bool isPlaying) {
-    if (pcf8574) {
-      pcf8574->setOutputPin(0, isPlaying);
-      pcf8574->setOutputPin(1, isPlaying);
-      pcf8574->setOutputPin(2, isPlaying);
-      pcf8574->setOutputPin(3, isPlaying);
+    if (outputCtrl && scheduler) {
+      const PlaybackConfig& cfg = scheduler->getConfig();
+      outputCtrl->applyModes(cfg.outputModes, isPlaying, cfg.startHour, cfg.endHour);
     }
   };
   web = new cap_Webserver(server);
-  scheduler = new PlaybackScheduler(mp3);
+  scheduler = new PlaybackScheduler(mp3, pcf8574);
   loadConfig();
 }
 
@@ -43,9 +43,8 @@ void Spieluhr::loop() {
 
 void Spieluhr::webEndpoints() {
   web->setupWebEndpoints();
-  setupMP3Endpoints(); // Cap_mp3ndpoints.cpp
-  setupSystemEndpoints(); // Cap_SystemEndpoints.cpp
-  setupExpanderEndpoints(); // Cap_ExpanderEndpoints.cpp
-  setupFilesystemEndpoints(); // Cap_FilesystemEndpoints.cpp
+  setupMP3Endpoints();         // Cap_mp3ndpoints.cpp
+  setupSystemEndpoints();      // Cap_SystemEndpoints.cpp
+  setupExpanderEndpoints();    // Cap_ExpanderEndpoints.cpp
+  setupFilesystemEndpoints();  // Cap_FilesystemEndpoints.cpp
 }
-
