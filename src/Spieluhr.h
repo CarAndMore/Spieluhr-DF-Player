@@ -23,6 +23,7 @@
 #include "Cap_WebServer.h"
 #include "Cap_DFPlayer.h"
 #include "PlaybackScheduler.h"
+#include "OutputController.h"
 
 /**
  * @class Spieluhr
@@ -45,6 +46,7 @@ public:
   /*** Scheduler-Modul zur zeitgesteuerten Wiedergabe. */
   PlaybackScheduler* scheduler = nullptr;
 
+  OutputController* outputCtrl = nullptr;
   /**
    * Konstruktor der Spieluhr.
    * 
