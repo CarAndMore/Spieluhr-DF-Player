@@ -58,13 +58,6 @@ Das Webinterface ist über IP oder Hostname erreichbar und bietet:
 5. Konfiguration vornehmen, CSS anpassen, Musik genießen 🎶
 
 ---
-## 📬 Feedback & Erweiterungsideen
-
-- Unterstützung für Favoriten oder Playlists
-- Zeitfenster für Wiedergabe (z. B. nur zwischen 8–18 Uhr)
-- MQTT-Integration für Smart Home
-- Web-Upload für MP3-Dateien
-
 ---
 Made with ❤️ by Carsten
 
