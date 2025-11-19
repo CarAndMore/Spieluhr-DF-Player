@@ -144,7 +144,7 @@ void cap_Webserver::handleStyleCSS() {
   css += ".checkboxCustom {\n";
   css += "  width: 28px;\n";
   css += "  height: 28px;\n";
-  css += "  border: 3px solid\n";
+  css += "  border: 3px solid #ffffff;\n";
   css += "  border-radius: 4px;\n";
   css += "  transition: background 0.3s;\n";
   css += "  position: relative;\n";
@@ -157,7 +157,7 @@ void cap_Webserver::handleStyleCSS() {
   css += "  left: 9px;\n";
   css += "  width: 6px;\n";
   css += "  height: 14px;\n";
-  css += "  border: solid #ffffff\n";
+  css += "  border: solid #ffffff;\n";
   css += "  border-width: 0 2px 2px 0;\n";
   css += "  transform: rotate(45deg);\n";
   css += "}\n";
