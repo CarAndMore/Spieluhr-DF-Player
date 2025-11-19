@@ -1,4 +1,4 @@
-/*** Cap_SystemEndpoints.cpp.cpp: */
+/*** Cap_Filesystem.cpp: */
 #include "Spieluhr.h"
 
 void Spieluhr::format_FS() {
@@ -15,9 +15,12 @@ bool Spieluhr::gen_configFile() {
   File configFile = LittleFS.open("/config.json", "w");
   if (configFile) {
     configFile.println("{");
-    configFile.println("  \"enabled\": true,");
-    configFile.println("  \"intervalHours\": 1,");
-    configFile.println("  \"activeDays\": [true, true, true, true, true, true, true]");
+    configFile.println("\"enabled\": true,");
+    configFile.println("\"intervalHours\": 1,");
+    configFile.println("\"startHour\": 8,");
+    configFile.println("\"endHour\": 16,");
+    configFile.println("\"outputModes\": [1, 1, 1, 1],");
+    configFile.println("\"activeDays\": [true, true, true, true, true, true, true]");
     configFile.println("}");
     configFile.close();
     return true;
@@ -38,15 +41,17 @@ void Spieluhr::loadConfig() {
       if (!err) {
         cfg.enabled = doc["enabled"] | true;
         cfg.intervalMinutes = doc["intervalMinutes"] | 60;
+        cfg.startHour = doc["startHour"] | 8;
+        cfg.endHour = doc["endHour"] | 13;
+        for (int i = 0; i < 4; i++) {
+          cfg.outputModes[i] = doc["outputModes"][i] | 0;
+        }
         for (int i = 0; i < 7; i++) {
           cfg.activeDays[i] = doc["activeDays"][i] | true;
         }
-      } else {
-        Serial.println("⚠️ Fehler beim Parsen von config.json – verwende Standardwerte");
       }
     }
   } else {
-    Serial.println("ℹ️ config.json nicht gefunden – verwende Standardwerte");
     cfg.enabled = true;
     cfg.intervalMinutes = 60;
     for (int i = 0; i < 7; i++) cfg.activeDays[i] = true;
@@ -57,22 +62,35 @@ void Spieluhr::loadConfig() {
 
 bool Spieluhr::gen_ThemaFile() {
   File cssFile = LittleFS.open("/thema.css", "w");
-  uint8_t r = 170, g = 32, b = 32;
+  uint8_t r = 128, g = 128, b = 255;
+  String background = "#000000";
+  String accent = "rgba(" + String(r) + "," + String(g) + "," + String(b) + ",1.0)";
+  String accentSoft = "rgba(" + String(r) + "," + String(g) + "," + String(b) + ",0.4)";
+  String accentVisited = "rgba(" + String(r) + "," + String(g) + "," + String(b) + ",0.6)";
 
   if (cssFile) {
-    cssFile.println("body {\n\tbackground: #555555;\n\tcolor: #111111;\n}");
-    cssFile.println("h1 {\n\tcolor: rgba(" + String(r) + ", " + String(g) + ", " + String(b) + ", 1.0);\n}");
+    cssFile.println("body {\n\tbackground: " + background + ";\n\tcolor: #dddddd;\n}");
 
-    cssFile.println("#volumeSlider::-webkit-slider-thumb {\n\tbackground: rgba(" + String(r) + ", " + String(g) + ", " + String(b) + ", 1.0);\n}");
-    cssFile.println("#volumeSlider::-moz-range-thumb {\n\tbackground: rgba(" + String(r) + ", " + String(g) + ", " + String(b) + ", 1.0);\n}");
-    cssFile.println("#volumeSlider::-webkit-slider-runnable-track {\n\tbackground: rgba(" + String(r) + ", " + String(g) + ", " + String(b) + ", 0.4);\n}");
-    cssFile.println("#volumeSlider::-moz-range-track {\n\tbackground: rgba(" + String(r) + ", " + String(g) + ", " + String(b) + ", 0.4);\n}");
+    cssFile.println("h1, a {\n\tcolor: " + accent + ";\n}");
+    cssFile.println("a:visited {\n\tcolor: " + accentVisited + ";\n}");
 
-    cssFile.println(".audioBar {\n\tbackground: rgba(" + String(r) + "," + String(g) + "," + String(b) + ",0.4);\n}");
-    cssFile.println(".audioBar select {\n\tbackground: #666666; color: #ffffff; }");
+    cssFile.println("footer, #infoTable th {\n\tbackground: " + background + ";");
+    cssFile.println("\tborder-color: " + accent + ";\n\tcolor: #ffffff;\n}");
 
-    cssFile.println(".btn {\n\tbackground: rgba(" + String(r) + "," + String(g) + "," + String(b) + ",1.0);;\n\tcolor: #ffffff; }\n");
-    cssFile.println(".btn:hover {\n\tbackground: rgba(" + String(r) + "," + String(g) + "," + String(b) + ",0.5);\n}");
+    cssFile.println("#infoTable td {\n\tborder-color: " + accent + ";\n}");
+
+    cssFile.println("#volumeSlider::-webkit-slider-thumb {\n\tbackground: " + accent + ";\n}");
+    cssFile.println("#volumeSlider::-moz-range-thumb {\n\tbackground: " + accent + ";\n}");
+    cssFile.println("#volumeSlider::-webkit-slider-runnable-track {\n\tbackground: " + accentSoft + ";\n}");
+    cssFile.println("#volumeSlider::-moz-range-track {\n\tbackground: " + accentSoft + ";\n}");
+
+    cssFile.println(".audioBar {\n\tbackground: " + accentSoft + ";\n}");
+
+    cssFile.println("input[type='file'] {\n\tcolor: " + accent + ";\n}");
+    cssFile.println(".checkboxWrap {\n\tcolor: " + accent + ";\n}");
+    cssFile.println(".checkboxCustom {\n\tbackground: " + background + ";\n\tborder-color: " + accent + ";\n}");
+    cssFile.println(".btn, select,\n  input[type='number'],input[type='file']::file-selector-button {");
+    cssFile.println("\tbackground: " + background + ";\n\tcolor: " + accent + ";\n\tborder-color: " + accentSoft + ";\n}");
 
     cssFile.close();
     return true;
