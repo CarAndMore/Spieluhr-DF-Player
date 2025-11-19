@@ -1,4 +1,4 @@
-/*** Cap_Filesystem.cpp: */
+/*** Cap_SystemEndpoints.cpp.cpp: */
 #include "Spieluhr.h"
 
 void Spieluhr::format_FS() {
@@ -63,7 +63,7 @@ void Spieluhr::loadConfig() {
 bool Spieluhr::gen_ThemaFile() {
   File cssFile = LittleFS.open("/thema.css", "w");
   uint8_t r = 128, g = 128, b = 255;
-  String background = "#000000";
+  String background = "#000022";
   String accent = "rgba(" + String(r) + "," + String(g) + "," + String(b) + ",1.0)";
   String accentSoft = "rgba(" + String(r) + "," + String(g) + "," + String(b) + ",0.4)";
   String accentVisited = "rgba(" + String(r) + "," + String(g) + "," + String(b) + ",0.6)";
@@ -88,7 +88,7 @@ bool Spieluhr::gen_ThemaFile() {
 
     cssFile.println("input[type='file'] {\n\tcolor: " + accent + ";\n}");
     cssFile.println(".checkboxWrap {\n\tcolor: " + accent + ";\n}");
-    cssFile.println(".checkboxCustom {\n\tbackground: " + background + ";\n\tborder-color: " + accent + ";\n}");
+    cssFile.println(".checkboxCustom, .checkboxWrap input[type='checkbox']:checked + .checkboxCustom::after {\n\tbackground: " + background + ";\n\tborder-color: " + accent + ";\n}");
     cssFile.println(".btn, select,\n  input[type='number'],input[type='file']::file-selector-button {");
     cssFile.println("\tbackground: " + background + ";\n\tcolor: " + accent + ";\n\tborder-color: " + accentSoft + ";\n}");
 
