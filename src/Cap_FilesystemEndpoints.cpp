@@ -41,7 +41,7 @@ void Spieluhr::setupFilesystemEndpoints() {
 
     server.send(200, "application/json", json);
   });
-  
+
   server.on("/schedulerconfig", HTTP_GET, [&]() {
     if (!scheduler) {
       server.send(500, "application/json", "{\"error\":\"Scheduler nicht initialisiert\"}");
@@ -49,17 +49,21 @@ void Spieluhr::setupFilesystemEndpoints() {
     }
 
     const PlaybackConfig& cfg = scheduler->getConfig();
+    DynamicJsonDocument doc(512);
 
-    String json = "";
-    json += "{";
-    json += "\"enabled\": " + String(cfg.enabled ? "true" : "false") + ",";
-    json += "\"intervalMinutes\": " + String(cfg.intervalMinutes) + ",";
-    json += "\"activeDays\": [";
-    for (int i = 0; i < 7; i++) {
-      json += (cfg.activeDays[i] ? "true" : "false");
-      if (i < 6) json += ",";
-    }
-    json += "]}";
+    doc["enabled"] = cfg.enabled;
+    doc["intervalMinutes"] = cfg.intervalMinutes;
+    doc["startHour"] = cfg.startHour;
+    doc["endHour"] = cfg.endHour;
+
+    JsonArray days = doc.createNestedArray("activeDays");
+    for (int i = 0; i < 7; i++) days.add(cfg.activeDays[i]);
+
+    JsonArray modes = doc.createNestedArray("outputModes");
+    for (int i = 0; i < 4; i++) modes.add(cfg.outputModes[i]);
+
+    String json;
+    serializeJson(doc, json);
 
     server.send(200, "application/json", json);
   });
@@ -81,10 +85,14 @@ void Spieluhr::setupFilesystemEndpoints() {
     PlaybackConfig cfg;
     cfg.enabled = doc["enabled"];
     cfg.intervalMinutes = doc["intervalMinutes"];
+    cfg.startHour = doc["startHour"];
+    cfg.endHour = doc["endHour"];
+    for (int i = 0; i < 4; i++) {
+      cfg.outputModes[i] = doc["outputModes"][i] | 0;
+    }
     for (int i = 0; i < 7; i++) {
       cfg.activeDays[i] = doc["activeDays"][i];
     }
-
     scheduler->setConfig(cfg);
 
     // Optional: in config.json speichern
@@ -112,5 +120,4 @@ void Spieluhr::setupFilesystemEndpoints() {
         if (fsUploadFile) fsUploadFile.close();
       }
     });
-
 }
