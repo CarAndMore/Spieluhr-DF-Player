@@ -19,6 +19,3 @@
 
 // I²C-Adresse des PCF8574-Portexpanders
 #define I2C_ADDR_PCF8574 0x20   ///< Standardadresse für den Expander
-
-// Ports für DNS und Webserver
-#define PORT_AP_DNS 53          ///< DNS-Port für Captive Portal
