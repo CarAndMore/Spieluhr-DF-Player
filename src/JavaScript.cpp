@@ -112,26 +112,41 @@ void cap_Webserver::handleScriptJS() {
   js += "  loadDoc(\"/uhrzeit\", \"uhrzeit\");\n";
   js += "}, 1000);\n";
   /***********************************/
-  js += "function loadSchedulerConfig() {\n";
-  js += "  fetch(\"/schedulerconfig\")\n";
-  js += "    .then(res => res.json())\n";
-  js += "    .then(cfg => {\n";
-  js += "      const dayOrder = [1, 2, 3, 4, 5, 6, 0];\n";
-  js += "      const dayNames = [\"So\", \"Mo\", \"Di\", \"Mi\", \"Do\", \"Fr\", \"Sa\"];\n";
-  js += "      let html = `<form id='configForm'>`;\n";
-  js += "      html += `<label><input type='checkbox' id='enabled' ${cfg.enabled ? \"checked\" : \"\"}> Scheduler aktiv</label><br><br>`;\n";
-  js += "      html += `<fieldset><legend>Aktive Wochentage:</legend>`;\n";
-  js += "      dayOrder.forEach(i => {\n";
-  js += "      html += `<label style='margin-right:10px;'><input type='checkbox' class='day' data-index='${i}' ${cfg.activeDays[i] ? \"checked\" : \"\"}> ${dayNames[i]}</label>`;";
-  js += "      });\n";
-  js += "      html += `</fieldset><br>`;\n";
-  js += "      html += `<label>Intervall (Minuten): <input type='number' id='interval' value='${cfg.intervalMinutes || 60}' min='1' max='1440'></label><br><br>`;\n";
-  js += "      html += `<button type='button' class='btn' onclick='saveConfig()'>Speichern</button>`;\n";
-  js += "      html += `</form>`;\n";
-  js += "      document.getElementById(\"json_config\").innerHTML = html;\n";
-  js += "    });\n";
-  js += "}\n";
+js += "function loadSchedulerConfig() {\n";
+js += "  fetch(\"/schedulerconfig\")\n";
+js += "    .then(res => res.json())\n";
+js += "    .then(cfg => {\n";
+js += "      const dayOrder = [1, 2, 3, 4, 5, 6, 0];\n";
+js += "      const dayNames = [\"So\", \"Mo\", \"Di\", \"Mi\", \"Do\", \"Fr\", \"Sa\"];\n";
+js += "      let html = `<form id='configForm'>`;\n";
 
+js += "      html += `<label class='checkboxWrap'><input type='checkbox' id='enabled' ${cfg.enabled ? \"checked\" : \"\"}><span class='checkboxCustom'></span> Scheduler aktiv</label><br><br>`;\n";
+js += "      html += `<fieldset><legend>Aktive Wochentage:</legend>`;\n";
+js += "      dayOrder.forEach(i => {\n";
+
+js += "       html += `<label class='checkboxWrap' style='margin-right:10px;'><input type='checkbox' class='day' data-index='${i}' data-index='${i}' ${cfg.activeDays[i] ? \"checked\" : \"\"}><span class='checkboxCustom'></span> ${dayNames[i]}</label>`;\n";
+
+js += "      });\n";
+js += "      html += `</fieldset><br>`;\n";
+js += "      html += `<label>Intervall (Minuten): <input type='number' id='interval' value='${cfg.intervalMinutes || 60}' min='1' max='1440'></label><br><br>`;\n";
+js += "      html += `<label>Startzeit (Stunde): <input type='number' id='startHour' value='${cfg.startHour || 7}' min='0' max='23'></label>`;\n";
+js += "      html += `<label>Endzeit (Stunde): <input type='number' id='endHour' value='${cfg.endHour || 16}' min='0' max='23'></label><br><br>`;\n";
+js += "      html += `<fieldset><legend>Output-Modi:</legend>`;\n";
+
+js += "      for (let i = 0; i < 4; i++) {\n";
+js += "        html += `<label><select data-pin='${i}' class='outputMode'>`;\n";
+js += "        html += `<option value='0' ${cfg.outputModes[i] === 0 ? \"selected\" : \"\"}>Immer aus</option>`;\n";
+js += "        html += `<option value='1' ${cfg.outputModes[i] === 1 ? \"selected\" : \"\"}>Nur bei Wiedergabe</option>`;\n";
+js += "        html += `<option value='2' ${cfg.outputModes[i] === 2 ? \"selected\" : \"\"}>Immer an</option>`;\n";
+js += "        html += `</select> P-Out:${i}: </label><br>`;\n";
+js += "      }\n";
+
+js += "      html += `</fieldset><br>`;\n";
+js += "      html += `<button type='button' class='btn' onclick='saveConfig()'>Speichern</button>`;\n";
+js += "      html += `</form>`;\n";
+js += "      document.getElementById(\"json_config\").innerHTML = html;\n";
+js += "    });\n";
+js += "}\n";
   /***********************************/
 
   /***********************************/
@@ -170,15 +185,24 @@ void cap_Webserver::handleScriptJS() {
   js += "function saveConfig() {\n";
   js += "  const enabled = document.getElementById(\"enabled\").checked;\n";
   js += "  const interval = parseInt(document.getElementById(\"interval\").value);\n";
+  js += "  const startHour = parseInt(document.getElementById(\"startHour\").value);\n";
+  js += "  const endHour = parseInt(document.getElementById(\"endHour\").value);\n";
   js += "  const activeDays = Array(7).fill(false);\n";
   js += "  document.querySelectorAll(\".day\").forEach(cb => {\n";
   js += "    const i = parseInt(cb.dataset.index);\n";
   js += "    activeDays[i] = cb.checked;\n";
   js += "  });\n";
+  js += "  const outputModes = [];\n";
+  js += "  document.querySelectorAll(\".outputMode\").forEach(sel => {\n";
+  js += "    outputModes.push(parseInt(sel.value));\n";
+  js += "  });\n";
   js += "  const config = {\n";
   js += "    enabled: enabled,\n";
   js += "    intervalMinutes: interval,\n";
-  js += "    activeDays: activeDays\n";
+  js += "    startHour: startHour,\n";
+  js += "    endHour: endHour,\n";
+  js += "    activeDays: activeDays,\n";
+  js += "    outputModes: outputModes\n";
   js += "  };\n";
   js += "  fetch(\"/saveconfig\", {\n";
   js += "    method: \"POST\",\n";
