@@ -16,6 +16,7 @@
 
 #include <time.h>
 #include "Cap_DFPlayer.h"
+#include "Cap_Expander.h"
 
 /**
  * @struct PlaybackConfig
@@ -29,6 +30,8 @@
 struct PlaybackConfig {
   bool enabled = true;
 
+  uint8_t startHour = 8;  // Beginn des aktiven Zeitfensters
+  uint8_t endHour = 16;   // Ende des aktiven Zeitfensters
   /**
    * Wiedergabeintervall in Minuten.
    * Beispiel: 60 = jede Stunde, 120 = alle 2 Stunden
@@ -40,6 +43,8 @@ struct PlaybackConfig {
    * true = aktiv, false = deaktiviert
    */
   bool activeDays[7] = { true, true, true, true, true, true, true };  // So–Sa
+
+  uint8_t outputModes[4] = { 0, 0, 0, 0 };  // 0 = aus, 1 = bei Wiedergabe, 2 = immer an
 };
 /**
   * @class PlaybackScheduler
@@ -55,9 +60,9 @@ public:
    * 
    * @param player Zeiger auf das MP3Player-Objekt zur Steuerung der Wiedergabe
    */
-  PlaybackScheduler(MP3Player* player);
+  PlaybackScheduler(MP3Player* player, IO_Expander* expander);
 
-  /**
+    /**
    * Haupt-Update-Methode, sollte regelmäßig im `loop()` aufgerufen werden.
    * 
    * Prüft:
@@ -67,8 +72,10 @@ public:
    * 
    * Bei Erfolg wird eine MP3-Wiedergabe ausgelöst.
    */
-  void update();
+    void update();
+  void update_365();
 
+  void setOutput(uint8_t pin, bool state);  // <- Deklaration
   /**
    * Setzt die aktuelle Scheduler-Konfiguration.
    * 
@@ -100,4 +107,5 @@ private:
    * Dient zur Erkennung von Intervallwechseln.
    */
   int lastMinute = -1;
+  IO_Expander* _expander;   // jetzt Pointer statt Referenz
 };
