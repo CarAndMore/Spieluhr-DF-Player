@@ -2,28 +2,30 @@
 #include "Cap_WebServer.h"
 
 void cap_Webserver::handleRoot() {
-  String title = "Spieluhr 4";
+  /***********************************/
+  String title = "Spieluhr 5";
   String tabs[][2] = {
     { "Infos", "infos" },   // Info-Tabelle
     { "Player", "audio" },  // Lautstärke & AudioBar
-    { "Outputs", "outputs" },
+    { "Outputs", "outputs" }, // IO Controller
     { "Konfig", "config" },    // IconUploader & Scheduler
     { "Editor", "cssEditor" }  // Live-CSS-Editor
   };
+  /***********************************/
   String html = "<!DOCTYPE html><html>";
   html += "<head>\n";
   html += myHeader(title);
   html += "</head>\n<body>\n";
   /***********************************/
-  html += "  <a href='/system8266/formatC'>format! Warnung</a><br>\n";
+  html += "  <header>\n";
+  html += "    <h1>Spieluhr</h1>\n";
   /***********************************/
-  html += "  <h1>Spieluhr</h1>\n";
-  /***********************************/
-  html += "  <nav class='tabs'>\n";
+  html += "    <nav class='tabs'>\n";
   for (int i = 0; i < sizeof(tabs) / sizeof(tabs[0]); i++) {
     html += "    <button class='btn' onclick='showTab(\"" + String(tabs[i][1]) + "\")'>" + tabs[i][0] + "</button>\n";
   }
-  html += "  </nav>\n";
+  html += "    </nav>\n";
+  html += "  </header>\n";
   /***********************************/
   html += "  <div class='tabContent' id='infos'></div>\n";
   html += "  <div class='tabContent' id='audio'>\n" + myVolume() + myAudioBar() + "</div>\n";
@@ -31,8 +33,15 @@ void cap_Webserver::handleRoot() {
   html += "  <div class='tabContent' id='config'>\n" + myFaviconUploader() + "<div id='json_config'></div>\n</div>\n";
   html += "  <div class='tabContent' id='cssEditor'>\n" + myEditor() + "</div>\n";
   /***********************************/
+  
+  html += "<footer>\n";
+  html += "  Status: <span id='mp3status'>Lade Status...</span>\n";
+  html += "  <a href='/system8266/formatC'>format! Warnung</a>\n";
+  html += "</footer>\n";
+  /***********************************/
   html += "</body>\n";
   html += "</html>\n";
+  /***********************************/
   server.send(200, "text/html", html);
 }
 
@@ -104,15 +113,21 @@ String cap_Webserver::myOutputControl() {
 
 void cap_Webserver::handleInfo() {
   String html = "";
-  html += "  <table border='1' style='margin: 20px auto; font-size: 14pt;'>\n";
+  html += "  <table id='infoTable'>\n";
+  html += "    <tr><th colspan='2'>Systemzeit</th></tr>\n";
   html += "    <tr><td class='name'>Uhrzeit</td><td class='value' id='uhrzeit'>Lade Uhrzeit...</td></tr>\n";
   html += "    <tr><td class='name'>Datum</td><td class='value' id='datum'>Lade Datum...</td></tr>\n";
+
+  html += "    <tr><th colspan='2'>WiFi</th></tr>\n";
   html += "    <tr><td class='name'>SSID</td><td class='value' id='ssid'>Lade SSID...</td></tr>\n";
-  html += "    <tr><td class='name'>IP-Adresse</td><td class='value' id='iplocal'>Lade IP Ardesse...</td></tr>\n";
+  html += "    <tr><td class='name'>IP-Adresse</td><td class='value' id='iplocal'>Lade IP-Adresse...</td></tr>\n";
+
+  html += "    <tr><th colspan='2'>Internes Filesystem</th></tr>\n";
   html += "    <tr><td class='name'>Speicher</td><td class='value'><span id='freespace'>?</span> frei</td></tr>\n";
   html += "    <tr><td class='name'>Dateien</td><td class='value' id='filecount'>?</td></tr>\n";
+
+  html += "    <tr><th colspan='2'>Player</th></tr>\n";
   html += "    <tr><td class='name'>Anzahl Songs</td><td class='value' id='count'>Lade Songs...</td></tr>\n";
-  html += "    <tr><td class='name'>status</td><td class='value' id='mp3status'>Lade Status...</td></tr>\n";
   html += "  </table>\n";
   server.send(200, "text/html", html);
 }
